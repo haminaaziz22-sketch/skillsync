@@ -1,0 +1,47 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <!-- Welcome Card -->
+    <div class="bg-indigo-50 border-l-4 border-indigo-500 p-6 rounded-xl shadow-md">
+        <h2 class="text-2xl font-bold text-indigo-700 mb-2">Welcome, {{ user.username }}!</h2>
+        <p class="text-gray-700">Here’s a quick overview of your skills, ratings, and profile.</p>
+    </div>
+
+    <!-- Skills Section -->
+    <div class="bg-white shadow-lg rounded-xl p-6">
+        <h3 class="text-xl font-semibold text-indigo-700 mb-4">Your Skills</h3>
+        {% if user_skills %}
+            <ul class="space-y-2">
+                {% for us in user_skills %}
+                    <li class="flex justify-between items-center bg-indigo-50 rounded-lg px-4 py-2 hover:bg-indigo-100 transition">
+                        <span>{{ us.skill.name }} <span class="text-gray-500">({{ us.skill.category }})</span></span>
+                        <a href="/delete-skill/{{ us.id }}/" class="text-red-500 hover:text-red-700 font-medium transition">Remove</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-gray-500">You haven’t added any skills yet.</p>
+        {% endif %}
+        <a href="/add-skill/" class="mt-4 inline-block bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium">Add Skill</a>
+    </div>
+
+    <!-- Rating Section -->
+    <div class="bg-white shadow-lg rounded-xl p-6">
+        <h3 class="text-xl font-semibold text-indigo-700 mb-4">Your Rating</h3>
+        {% if user.average_rating %}
+            <p class="text-gray-700 text-lg">Average Rating: <span class="font-bold text-indigo-600">{{ user.average_rating }} ⭐</span></p>
+        {% else %}
+            <p class="text-gray-500">You have not been rated yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Profile Link -->
+    <div class="bg-white shadow-lg rounded-xl p-6 flex flex-col md:flex-row md:justify-between md:items-center">
+        <p class="text-gray-700 mb-4 md:mb-0">Manage your personal information and preferences.</p>
+        <a href="{% url 'profile' %}" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-medium text-center md:text-left">Go to Profile</a>
+    </div>
+
+</div>
+{% endblock %}

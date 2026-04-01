@@ -1,0 +1,25 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+<h2>Create Session</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <label>Date & Time:</label>
+    <input type="datetime-local" name="date">
+
+    <br><br>
+
+    <label>Type:</label>
+    <select name="type">
+        <option value="online">Online</option>
+        <option value="inperson">In Person</option>
+    </select>
+
+    <br><br>
+
+    <button type="submit">Create Session</button>
+</form>
+
+{% endblock %}

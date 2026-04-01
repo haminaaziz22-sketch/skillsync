@@ -1,0 +1,57 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+<div class="mb-6">
+    <h2 class="text-3xl font-extrabold text-indigo-700 mb-6">My Sessions</h2>
+</div>
+
+{% if sessions %}
+    <ul class="space-y-6">
+        {% for session in sessions %}
+            <li class="p-6 border rounded-xl shadow hover:shadow-lg bg-white transition duration-200">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 items-center">
+                    <!-- Session Info -->
+                    <div>
+                        <p class="text-gray-700"><span class="font-semibold">Type:</span> {{ session.type }}</p>
+                        <p class="text-gray-700"><span class="font-semibold">Date:</span> {{ session.date }}</p>
+                        <p class="text-gray-700"><span class="font-semibold">Status:</span> 
+                            <span class="px-2 py-1 rounded-full text-sm font-medium
+                                {% if session.status == 'scheduled' %} bg-yellow-100 text-yellow-800
+                                {% elif session.status == 'completed' %} bg-green-100 text-green-800
+                                {% elif session.status == 'canceled' %} bg-red-100 text-red-800
+                                {% else %} bg-gray-100 text-gray-800 {% endif %}">
+                                {{ session.status|title }}
+                            </span>
+                        </p>
+                    </div>
+
+                    <!-- Spacer for layout on large screens -->
+                    <div class="hidden md:block"></div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-wrap gap-3 mt-4 md:mt-0 justify-start md:justify-end">
+                        <a href="/session/{{ session.id }}/">
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">View Details</button>
+                        </a>
+
+                        {% if session.status == 'scheduled' %}
+                            <a href="/reschedule-session/{{ session.id }}/">
+                                <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition">Reschedule</button>
+                            </a>
+
+                            <a href="/cancel-session/{{ session.id }}/">
+                                <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">Cancel</button>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <div class="text-center py-12 text-gray-500 bg-gray-50 rounded-xl shadow">
+        You have no sessions yet.
+    </div>
+{% endif %}
+
+{% endblock %}

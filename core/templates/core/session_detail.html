@@ -1,0 +1,52 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+<h2 class="text-3xl font-extrabold text-indigo-700 mb-6">Session Details</h2>
+
+<div class="p-6 border rounded-xl shadow bg-white mb-6">
+    <p class="text-gray-700"><strong>Date:</strong> {{ session.date }}</p>
+    <p class="text-gray-700"><strong>Type:</strong> {{ session.type }}</p>
+    <p class="text-gray-700">
+        <strong>Status:</strong> 
+        <span class="px-2 py-1 rounded-full text-sm font-medium
+            {% if session.status == 'scheduled' %} bg-yellow-100 text-yellow-800
+            {% elif session.status == 'completed' %} bg-green-100 text-green-800
+            {% else %} bg-gray-100 text-gray-800 {% endif %}">
+            {{ session.status|title }}
+        </span>
+    </p>
+
+    {% if session.status == 'scheduled' and session.date <= now %}
+    <div class="mt-4">
+        <a href="/complete-session/{{ session.id }}/">
+            <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+                Mark Completed
+            </button>
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<h3 class="text-xl font-semibold text-gray-800 mb-2">Participants</h3>
+<ul class="space-y-2 mb-6">
+    {% for p in session.sessionparticipant_set.all %}
+    <li class="p-3 bg-gray-50 border rounded-lg">{{ p.user.username }}</li>
+    {% endfor %}
+</ul>
+
+{% if session.status == 'completed' %}
+<h3 class="text-xl font-semibold text-gray-800 mb-2">Rate Your Partner</h3>
+<div class="space-y-3">
+    {% for p in session.sessionparticipant_set.all %}
+        {% if p.user != user %}
+        <a href="/rate/{{ session.id }}/{{ p.user.id }}/">
+            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+                Rate {{ p.user.username }}
+            </button>
+        </a>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}
