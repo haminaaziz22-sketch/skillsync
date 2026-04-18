@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 md:py-10 space-y-8">
+
+    <!-- Header -->
+    <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 md:p-8 shadow-sm">
+        <h2 class="text-3xl font-extrabold text-indigo-700 mb-2">Browse Offers</h2>
+        <p class="text-gray-700 max-w-2xl">
+            Explore skills people are offering and see what they would like to learn in return.
+        </p>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="bg-white shadow-lg rounded-2xl p-6 border border-gray-100">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Skill</label>
+                <input type="text"
+                       name="skill"
+                       value="{{ request.GET.skill }}"
+                       placeholder="e.g. Spanish"
+                       class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                <input type="text"
+                       name="category"
+                       value="{{ request.GET.category }}"
+                       placeholder="e.g. Language"
+                       class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Keyword</label>
+                <input type="text"
+                       name="keyword"
+                       value="{{ request.GET.keyword }}"
+                       placeholder="Search description"
+                       class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                <select name="status"
+                        class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Any</option>
+                    <option value="open" {% if request.GET.status == "open" %}selected{% endif %}>Open</option>
+                    <option value="matched" {% if request.GET.status == "matched" %}selected{% endif %}>Matched</option>
+                    <option value="closed" {% if request.GET.status == "closed" %}selected{% endif %}>Closed</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit"
+                        class="flex-1 bg-indigo-600 text-white px-4 py-3 rounded-xl hover:bg-indigo-700 transition font-semibold shadow-sm hover:shadow-md">
+                    Filter
+                </button>
+                <a href="{% url 'browse_offers' %}"
+                   class="flex-1 text-center border border-gray-300 text-gray-700 px-4 py-3 rounded-xl hover:bg-gray-50 transition font-medium">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Offers List -->
+    <div class="space-y-5">
+        {% for offer in offers %}
+            <div class="bg-white shadow-lg rounded-2xl p-6 md:p-7 hover:shadow-xl transition border border-gray-100">
+                <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-3 mb-3">
+                            <h3 class="text-xl font-bold text-indigo-700">
+                                {{ offer.creator.username }} offers {{ offer.offered_skill.name }}
+                            </h3>
+
+                            <span class="text-sm px-3 py-1 rounded-full font-medium
+                                {% if offer.status == 'open' %}bg-green-100 text-green-700
+                                {% elif offer.status == 'matched' %}bg-blue-100 text-blue-700
+                                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                {{ offer.status|title }}
+                            </span>
+                        </div>
+
+                        <p class="text-gray-700 mb-2">
+                            <span class="font-semibold">Looking for:</span> {{ offer.requested_skill.name }}
+                        </p>
+
+                        {% if offer.description %}
+                            <p class="text-gray-600 mb-4 leading-7">{{ offer.description }}</p>
+                        {% endif %}
+
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            {% if offer.prefers_online %}
+                                <span class="bg-indigo-50 text-indigo-700 text-sm px-3 py-1 rounded-full font-medium">
+                                    Online
+                                </span>
+                            {% endif %}
+
+                            {% if offer.prefers_inperson %}
+                                <span class="bg-indigo-50 text-indigo-700 text-sm px-3 py-1 rounded-full font-medium">
+                                    In-person
+                                </span>
+                            {% endif %}
+
+                            {% if offer.multiple_sessions %}
+                                <span class="bg-purple-50 text-purple-700 text-sm px-3 py-1 rounded-full font-medium">
+                                    Multiple sessions
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        {% if offer.suggested_location %}
+                            <p class="text-sm text-gray-500">
+                                <span class="font-semibold">Suggested location:</span> {{ offer.suggested_location }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="lg:w-56">
+                        {% if user.is_authenticated and offer.creator != user %}
+                            {% if offer.status == 'open' %}
+                                {% if offer.user_has_skill %}
+                                    {% if offer.user_sent_request %}
+                                        <div class="bg-gray-100 text-gray-600 text-center px-4 py-3 rounded-xl font-medium">
+                                            Request Sent
+                                        </div>
+                                    {% else %}
+                                        <form method="post" action="{% url 'express_interest' offer.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit"
+                                                    class="inline-flex items-center justify-center w-full bg-indigo-600 text-white px-4 py-3 rounded-xl hover:bg-indigo-700 transition font-semibold shadow-sm hover:shadow-md">
+                                                I’m Interested
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="bg-red-50 text-red-700 border border-red-200 px-4 py-3 rounded-xl text-sm font-medium">
+                                        You do not have the required skill.
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        {% elif not user.is_authenticated %}
+                            <a href="{% url 'login' %}"
+                            class="inline-flex items-center justify-center w-full bg-indigo-600 text-white px-4 py-3 rounded-xl hover:bg-indigo-700 transition font-semibold shadow-sm hover:shadow-md">
+                                Log in to respond
+                            </a>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        {% empty %}
+            <div class="bg-white border border-gray-200 rounded-2xl p-10 text-center shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">No offers found</h3>
+                <p class="text-gray-500 mb-4">
+                    Try changing your filters or check back later for new skill exchanges.
+                </p>
+                <a href="{% url 'browse_offers' %}"
+                   class="inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl transition font-semibold">
+                    Clear Filters
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

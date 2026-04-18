@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="max-w-6xl mx-auto px-4 py-8 md:py-10">
+    <div class="mb-8">
+        <h2 class="text-3xl font-extrabold text-indigo-700 mb-2">Cultural Discovery Hub</h2>
+        <p class="text-gray-600 max-w-3xl">
+            Discover people who can share cultural knowledge, traditions, language, food, travel insight, and creative practices that align with your interests.
+        </p>
+    </div>
+
+    {% if not cultural_enabled %}
+        <div class="text-center py-12 px-6 text-gray-600 bg-gray-50 rounded-2xl shadow-sm border border-gray-200">
+            <p class="font-semibold text-lg text-gray-800 mb-2">Cultural discovery is currently turned off</p>
+            <p class="mb-4">
+                Turn it on in your profile and add a few cultural interests so we can recommend better matches.
+            </p>
+            <a href="{% url 'profile' %}"
+               class="inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl transition font-semibold shadow-sm hover:shadow-md">
+                Update Interests
+            </a>
+        </div>
+
+    {% elif has_results %}
+        <ul class="space-y-6">
+            {% for match in matches %}
+            <li class="p-6 md:p-7 border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg bg-white transition
+                       {% if match.request_status == 'accepted' %}bg-green-50 border-green-200{% endif %}">
+                <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+
+                    <!-- Left content -->
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-4 flex-wrap">
+                            <h3 class="text-xl font-bold text-gray-800">
+                                {{ match.user.username }}
+                            </h3>
+
+                            {% if match.match_type == 'direct' %}
+                            <span class="text-sm bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-semibold">
+                                Direct match
+                            </span>
+                            {% else %}
+                            <span class="text-sm bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-semibold">
+                                Discovery match
+                            </span>
+                            {% endif %}
+
+                            {% if match.score %}
+                            <span class="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-full font-semibold">
+                                Score: {{ match.score }}
+                            </span>
+                            {% endif %}
+
+                            {% if match.average_rating %}
+                            <span class="text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-medium">
+                                ⭐ {{ match.average_rating }}
+                            </span>
+                            {% endif %}
+
+                            {% if match.user.userprofile.city %}
+                            <span class="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-full">
+                                📍 {{ match.user.userprofile.city }}
+                            </span>
+                            {% endif %}
+
+                            {% if match.request_status == 'pending' %}
+                            <span class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">
+                                Request in progress
+                            </span>
+                            {% elif match.request_status == 'accepted' %}
+                            <span class="text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium">
+                                ✅ Already connected
+                            </span>
+                            {% elif match.request_status == 'rejected' %}
+                            <span class="text-sm bg-red-100 text-red-800 px-3 py-1 rounded-full font-medium">
+                                Request declined
+                            </span>
+                            {% elif match.request_status == 'cancelled' %}
+                            <span class="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-full font-medium">
+                                Request cancelled
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        {% if match.request_status == 'pending' %}
+                        <div class="mb-5 p-4 rounded-xl bg-blue-50 border border-blue-200">
+                            {% if match.request_direction == 'sent' %}
+                            <p class="text-sm text-blue-800">
+                                You already sent a request to <strong>{{ match.user.username }}</strong>. You’re now waiting for their response.
+                            </p>
+                            {% else %}
+                            <p class="text-sm text-blue-800">
+                                <strong>{{ match.user.username }}</strong> has already sent you a request. You can review it now.
+                            </p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if match.reasons %}
+                        <div class="mb-5">
+                            <p class="text-sm font-semibold text-indigo-700 mb-2">Why this match stands out</p>
+                            <ul class="space-y-2">
+                                {% for reason in match.reasons %}
+                                <li class="text-sm text-gray-700 flex items-start gap-2">
+                                    <span class="text-green-600 mt-0.5">✔</span>
+                                    <span>{{ reason }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        {% if match.matching_skills %}
+                        <div class="mb-4">
+                            <p class="text-sm font-semibold text-gray-800 mb-2">Direct cultural matches</p>
+                            <div class="flex flex-wrap gap-2">
+                                {% for user_skill in match.matching_skills %}
+                                <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    {{ user_skill.skill.name }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if match.tag_matching_skills %}
+                        <div class="mb-4">
+                            <p class="text-sm font-semibold text-gray-800 mb-2">Related cultural themes</p>
+                            <div class="flex flex-wrap gap-2">
+                                {% for user_skill in match.tag_matching_skills %}
+                                <span class="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    {{ user_skill.skill.name }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if match.custom_interest_matches %}
+                        <div class="mb-4">
+                            <p class="text-sm font-semibold text-gray-800 mb-2">Matches your custom interests</p>
+                            <div class="flex flex-wrap gap-2">
+                                {% for user_skill in match.custom_interest_matches %}
+                                <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    {{ user_skill.skill.name }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if match.reciprocal_skills %}
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800 mb-2">Skills you have that may interest them</p>
+                            <div class="flex flex-wrap gap-2">
+                                {% for user_skill in match.reciprocal_skills %}
+                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    {{ user_skill.skill.name }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Right action area -->
+                    <div class="flex flex-col items-start lg:items-end gap-3 min-w-[260px]">
+                        {% if match.request_status == 'accepted' %}
+                            <a href="{% url 'my_cultural_connections' %}"
+                               class="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-xl transition font-medium text-center w-full">
+                                View Connection
+                            </a>
+
+                        {% elif match.request_status == 'pending' %}
+                            {% if match.request_direction == 'sent' %}
+                                <a href="{% url 'my_requests' %}"
+                                   class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-xl transition font-medium text-center w-full">
+                                    View Sent Request
+                                </a>
+                            {% else %}
+                                <a href="{% url 'review_requests' %}"
+                                   class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-xl transition font-medium text-center w-full">
+                                    Review Incoming Request
+                                </a>
+                            {% endif %}
+
+                        {% elif match.request_status == 'rejected' or match.request_status == 'cancelled' %}
+                            <form method="post" action="{% url 'send_cultural_interest' match.user.id %}" class="w-full">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl transition font-medium w-full">
+                                    Send Again
+                                </button>
+                            </form>
+
+                        {% else %}
+                            <form method="post" action="{% url 'send_cultural_interest' match.user.id %}" class="w-full space-y-3">
+                                {% csrf_token %}
+                                <textarea
+                                    name="initial_message"
+                                    rows="3"
+                                    placeholder="Optional: introduce yourself and share what you'd like to learn or explore together..."
+                                    class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                ></textarea>
+                                <button type="submit"
+                                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-xl transition font-medium w-full shadow-sm hover:shadow-md">
+                                    I'm Interested
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="text-center py-12 px-6 text-gray-500 bg-gray-50 rounded-2xl shadow-sm border border-gray-200">
+            <p class="font-semibold text-lg text-gray-800 mb-2">No cultural matches found yet</p>
+            <p class="mb-4">
+                Try adding more interests, categories, or custom cultural topics in your profile to unlock better recommendations.
+            </p>
+            <a href="{% url 'profile' %}"
+               class="inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl transition font-semibold">
+                Update Interests
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

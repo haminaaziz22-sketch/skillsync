@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="h-[calc(100vh-80px)] bg-gradient-to-br from-slate-100 via-white to-slate-200">
+    <div class="max-w-5xl mx-auto h-full px-4 py-4">
+        <div class="h-full flex flex-col bg-white/90 backdrop-blur shadow-2xl rounded-3xl overflow-hidden border border-gray-200">
+
+            <!-- HEADER -->
+            <div class="flex items-center justify-between px-5 py-4 border-b bg-white">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold text-lg shadow">
+                        {% if offer %}
+                            {% if request.user == offer.creator %}
+                                {{ offer.matched_user.username|slice:":1"|upper }}
+                            {% else %}
+                                {{ offer.creator.username|slice:":1"|upper }}
+                            {% endif %}
+                        {% else %}
+                            {% if request.user == cultural_request.sender %}
+                                {{ cultural_request.receiver.username|slice:":1"|upper }}
+                            {% else %}
+                                {{ cultural_request.sender.username|slice:":1"|upper }}
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <div class="min-w-0">
+                        <h2 class="text-lg md:text-xl font-bold text-gray-900 truncate">
+                            {% if offer %}
+                                {% if request.user == offer.creator %}
+                                    {{ offer.matched_user.username }}
+                                {% else %}
+                                    {{ offer.creator.username }}
+                                {% endif %}
+                            {% else %}
+                                {% if request.user == cultural_request.sender %}
+                                    {{ cultural_request.receiver.username }}
+                                {% else %}
+                                    {{ cultural_request.sender.username }}
+                                {% endif %}
+                            {% endif %}
+                        </h2>
+                        <p class="text-sm text-green-600 font-medium">Online</p>
+                    </div>
+                </div>
+
+                <a href="{% if offer %}{% url 'my_offers' %}{% else %}{% url 'my_cultural_connections' %}{% endif %}"
+                   class="shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-full transition font-medium">
+                    Back
+                </a>
+            </div>
+
+            <!-- CHAT MESSAGES -->
+            <div id="chat-box" class="flex-1 overflow-y-auto px-4 py-5 bg-gradient-to-b from-slate-50 to-white space-y-4">
+
+                {% if chat_messages %}
+                    {% for msg in chat_messages %}
+                        <div class="flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}">
+                            <div class="max-w-[85%] md:max-w-[65%]">
+
+                                {% if msg.sender != request.user %}
+                                    <p class="text-xs text-gray-500 mb-1 px-1">{{ msg.sender.username }}</p>
+                                {% endif %}
+
+                                <div class="rounded-3xl px-4 py-3 shadow-sm
+                                    {% if msg.sender == request.user %}
+                                        bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-br-md
+                                    {% else %}
+                                        bg-white text-gray-900 border border-gray-200 rounded-bl-md
+                                    {% endif %}
+                                ">
+                                    <p class="text-[15px] leading-relaxed break-words whitespace-pre-line">{{ msg.text }}</p>
+                                </div>
+
+                                <p class="text-[11px] text-gray-400 mt-1 px-1 {% if msg.sender == request.user %}text-right{% endif %}">
+                                    {{ msg.timestamp|date:"g:i a" }}
+                                </p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="h-full flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="text-5xl mb-3">💬</div>
+                            <p class="text-gray-600 font-medium">No messages yet</p>
+                            <p class="text-sm text-gray-400">Say hi and start the conversation</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- INPUT BAR -->
+            <div class="border-t bg-white px-4 py-3">
+                <form method="post" class="space-y-3" id="chat-form">
+                    {% csrf_token %}
+
+                    <div class="flex items-end gap-2">
+                        <!-- Emoji Button -->
+                        <div class="relative">
+                            <button type="button"
+                                    id="emoji-toggle"
+                                    class="w-11 h-11 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-xl transition">
+                                😊
+                            </button>
+
+                            <div id="emoji-picker"
+                                 class="hidden absolute bottom-14 left-0 bg-white border border-gray-200 rounded-2xl shadow-xl p-3 w-64 z-20">
+                                <div class="grid grid-cols-6 gap-2 text-xl">
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">😀</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">😂</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">😍</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">🥳</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">😎</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">🤔</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">😭</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">🔥</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">❤️</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">👍</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">👏</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">🎉</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">😅</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">🙌</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">🤝</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">💡</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">✅</button>
+                                    <button type="button" class="emoji-btn hover:scale-125 transition">🚀</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Message Input -->
+                        <div class="flex-1">
+                            <textarea
+                                id="message-input"
+                                name="text"
+                                rows="1"
+                                class="w-full resize-none rounded-2xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 max-h-40"
+                                placeholder="Type a message..."></textarea>
+                        </div>
+
+                        <!-- Voice Input -->
+                        <button type="button"
+                                id="voice-btn"
+                                class="w-11 h-11 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-lg transition"
+                                title="Voice to text">
+                            🎙️
+                        </button>
+
+                        <!-- Send -->
+                        <button type="submit"
+                                class="px-5 h-11 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold shadow-md transition">
+                            Send
+                        </button>
+                    </div>
+
+                    <p id="voice-status" class="text-xs text-gray-400 hidden px-1">Listening...</p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const textarea = document.getElementById('message-input');
+    const emojiToggle = document.getElementById('emoji-toggle');
+    const emojiPicker = document.getElementById('emoji-picker');
+    const voiceBtn = document.getElementById('voice-btn');
+    const voiceStatus = document.getElementById('voice-status');
+    const chatForm = document.getElementById('chat-form');
+
+    const fetchUrl = "{% if is_cultural %}{% url 'fetch_messages' cultural_request.id %}{% else %}{% url 'fetch_messages' offer.id %}{% endif %}";
+    let lastRenderedHtml = "";
+
+    function scrollToBottom() {
+        if (chatBox) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML;
+    }
+
+    function renderMessages(messages) {
+        if (!chatBox) return;
+
+        if (!messages || !messages.length) {
+            const emptyHtml = `
+                <div class="h-full flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-5xl mb-3">💬</div>
+                        <p class="text-gray-600 font-medium">No messages yet</p>
+                        <p class="text-sm text-gray-400">Say hi and start the conversation</p>
+                    </div>
+                </div>
+            `;
+
+            if (lastRenderedHtml !== emptyHtml) {
+                chatBox.innerHTML = emptyHtml;
+                lastRenderedHtml = emptyHtml;
+            }
+            return;
+        }
+
+        const html = messages.map(msg => {
+            const isOwn = !!msg.is_own;
+
+            return `
+                <div class="flex ${isOwn ? 'justify-end' : 'justify-start'}">
+                    <div class="max-w-[85%] md:max-w-[65%]">
+                        ${!isOwn ? `<p class="text-xs text-gray-500 mb-1 px-1">${escapeHtml(msg.sender)}</p>` : ''}
+
+                        <div class="rounded-3xl px-4 py-3 shadow-sm ${
+                            isOwn
+                                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-br-md'
+                                : 'bg-white text-gray-900 border border-gray-200 rounded-bl-md'
+                        }">
+                            <p class="text-[15px] leading-relaxed break-words whitespace-pre-line">${escapeHtml(msg.text)}</p>
+                        </div>
+
+                        <p class="text-[11px] text-gray-400 mt-1 px-1 ${isOwn ? 'text-right' : ''}">
+                            ${escapeHtml(msg.timestamp)}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        if (html !== lastRenderedHtml) {
+            const wasNearBottom =
+                chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 120;
+
+            chatBox.innerHTML = html;
+            lastRenderedHtml = html;
+
+            if (wasNearBottom) {
+                scrollToBottom();
+            }
+        }
+    }
+
+    async function loadMessages() {
+        try {
+            const response = await fetch(fetchUrl, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) {
+                console.error('Fetch failed:', response.status);
+                return;
+            }
+
+            const data = await response.json();
+            renderMessages(data.messages || []);
+        } catch (error) {
+            console.error('Failed to fetch messages:', error);
+        }
+    }
+
+    // Initial load + polling
+    if (chatBox) {
+        scrollToBottom();
+        loadMessages();
+        setInterval(loadMessages, 3000);
+    }
+
+    // Auto resize textarea
+    if (textarea) {
+        textarea.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    }
+
+    // Emoji picker
+    if (emojiToggle && emojiPicker && textarea) {
+        emojiToggle.addEventListener('click', () => {
+            emojiPicker.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('.emoji-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                textarea.value += btn.textContent;
+                textarea.focus();
+                emojiPicker.classList.add('hidden');
+                textarea.dispatchEvent(new Event('input'));
+            });
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!emojiPicker.contains(e.target) && !emojiToggle.contains(e.target)) {
+                emojiPicker.classList.add('hidden');
+            }
+        });
+    }
+
+    // Submit on Enter, newline on Shift+Enter
+    if (textarea) {
+        textarea.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (this.value.trim()) {
+                    chatForm.submit();
+                }
+            }
+        });
+    }
+
+    // Voice to text
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition && voiceBtn) {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.continuous = false;
+
+        voiceBtn.addEventListener('click', () => {
+            recognition.start();
+            voiceStatus.classList.remove('hidden');
+            voiceStatus.textContent = 'Listening...';
+            voiceBtn.classList.add('bg-red-100');
+        });
+
+        recognition.onresult = function (event) {
+            const transcript = event.results[0][0].transcript;
+            textarea.value = textarea.value ? textarea.value + ' ' + transcript : transcript;
+            textarea.focus();
+            textarea.dispatchEvent(new Event('input'));
+        };
+
+        recognition.onend = function () {
+            voiceStatus.classList.add('hidden');
+            voiceBtn.classList.remove('bg-red-100');
+        };
+
+        recognition.onerror = function () {
+            voiceStatus.classList.remove('hidden');
+            voiceStatus.textContent = 'Voice input failed. Try again.';
+            voiceBtn.classList.remove('bg-red-100');
+
+            setTimeout(() => {
+                voiceStatus.classList.add('hidden');
+            }, 2500);
+        };
+    } else if (voiceBtn) {
+        voiceBtn.addEventListener('click', () => {
+            alert('Voice-to-text is not supported in this browser.');
+        });
+    }
+</script>
+
+{% endblock %}

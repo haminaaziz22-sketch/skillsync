@@ -1,0 +1,414 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="max-w-6xl mx-auto px-4 py-8 md:py-10">
+
+    <!-- Page header -->
+    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
+        <div>
+            <h2 class="text-3xl font-extrabold text-indigo-700">Your Profile</h2>
+            <p class="text-gray-600 mt-2 max-w-2xl">
+                Manage your account details, preferences, availability, security, and skills in one place.
+            </p>
+        </div>
+    </div>
+
+
+    {% if form.non_field_errors %}
+        <div class="bg-red-100 text-red-800 px-4 py-3 rounded-xl mb-6">
+            {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="grid lg:grid-cols-3 gap-8">
+
+        <!-- Main form column -->
+        <div class="lg:col-span-2">
+            <div class="bg-white shadow rounded-2xl p-7 md:p-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Profile Settings</h3>
+
+                <form method="post" class="space-y-8">
+                    {% csrf_token %}
+                    {{ form.availability_json }}
+
+                    <!-- Account details -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Account Details</h4>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Update the basic details people use to recognize and contact you.
+                        </p>
+
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    {{ account_form.username.label }}
+                                </label>
+                                {{ account_form.username }}
+                                {% if account_form.username.errors %}
+                                    <div class="text-red-600 text-sm mt-1">
+                                        {% for error in account_form.username.errors %}<p>{{ error }}</p>{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    {{ account_form.email.label }}
+                                </label>
+                                {{ account_form.email }}
+                                {% if account_form.email.errors %}
+                                    <div class="text-red-600 text-sm mt-1">
+                                        {% for error in account_form.email.errors %}<p>{{ error }}</p>{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Session preferences -->
+                    <div class="border-t border-gray-100 pt-8">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4">Session Preferences</h4>
+
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl bg-gray-50">
+                                {{ form.prefers_online }}
+                                <div>
+                                    <p class="font-medium text-gray-800">{{ form.prefers_online.label }}</p>
+                                </div>
+                            </label>
+
+                            <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl bg-gray-50">
+                                {{ form.prefers_inperson }}
+                                <div>
+                                    <p class="font-medium text-gray-800">{{ form.prefers_inperson.label }}</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="border-t border-gray-100 pt-8">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4">Location</h4>
+
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    {{ form.city.label }}
+                                </label>
+                                {{ form.city }}
+                                {% if form.city.errors %}
+                                    <div class="text-red-600 text-sm mt-1">
+                                        {% for error in form.city.errors %}<p>{{ error }}</p>{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    {{ form.country.label }}
+                                </label>
+                                {{ form.country }}
+                                {% if form.country.errors %}
+                                    <div class="text-red-600 text-sm mt-1">
+                                        {% for error in form.country.errors %}<p>{{ error }}</p>{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weekly availability -->
+                    <div class="border-t border-gray-100 pt-8">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Weekly Availability</h4>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Add the times you are usually available each week.
+                        </p>
+
+                        <div class="grid sm:grid-cols-4 gap-3 items-end bg-gray-50 border border-gray-200 rounded-xl p-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Day</label>
+                                <select id="availability-day" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="Mon">Monday</option>
+                                    <option value="Tue">Tuesday</option>
+                                    <option value="Wed">Wednesday</option>
+                                    <option value="Thu">Thursday</option>
+                                    <option value="Fri">Friday</option>
+                                    <option value="Sat">Saturday</option>
+                                    <option value="Sun">Sunday</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Start time</label>
+                                <input type="time" id="availability-start" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">End time</label>
+                                <input type="time" id="availability-end" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+
+                            <div>
+                                <button type="button" id="add-availability-slot" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-3 rounded-xl transition">
+                                    Add Slot
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="availability-errors" class="text-red-600 text-sm mt-3"></div>
+                        <div id="availability-list" class="mt-4 space-y-3"></div>
+                    </div>
+
+                    <!-- Safety -->
+                    <div class="border-t border-gray-100 pt-8">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4">Safety & Matching</h4>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    {{ form.safety_notes.label }}
+                                </label>
+                                {{ form.safety_notes }}
+                                {% if form.safety_notes.errors %}
+                                    <div class="text-red-600 text-sm mt-1">
+                                        {% for error in form.safety_notes.errors %}<p>{{ error }}</p>{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl bg-gray-50">
+                                {{ form.enable_smart_matching }}
+                                <div>
+                                    <p class="font-medium text-gray-800">{{ form.enable_smart_matching.label }}</p>
+                                    <p class="text-sm text-gray-500">{{ form.enable_smart_matching.help_text }}</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Cultural discovery -->
+                    <div class="border-t border-gray-100 pt-8">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Cultural Discovery</h4>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Share the kinds of cultural topics, practices, or skills you would like to explore.
+                        </p>
+
+                        <div class="space-y-4">
+                            <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl bg-gray-50">
+                                {{ form.interested_in_cultural_exchange }}
+                                <div>
+                                    <p class="font-medium text-gray-800">{{ form.interested_in_cultural_exchange.label }}</p>
+                                    <p class="text-sm text-gray-500">{{ form.interested_in_cultural_exchange.help_text }}</p>
+                                </div>
+                            </label>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    {{ form.cultural_skills_wanted.label }}
+                                </label>
+                                {{ form.cultural_skills_wanted }}
+                                <p class="text-sm text-gray-500 mt-1">
+                                    {{ form.cultural_skills_wanted.help_text }}
+                                </p>
+                                {% if form.cultural_skills_wanted.errors %}
+                                    <div class="text-red-600 text-sm mt-1">
+                                        {% for error in form.cultural_skills_wanted.errors %}<p>{{ error }}</p>{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- New typed cultural interest field -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Other cultural interests
+                                </label>
+                                {{ form.cultural_interest_other }}
+                                {% if form.cultural_interest_other.errors %}
+                                    <div class="text-red-600 text-sm mt-1">
+                                        {% for error in form.cultural_interest_other.errors %}<p>{{ error }}</p>{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save -->
+                    <div class="border-t border-gray-100 pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <p class="text-sm text-gray-500">
+                            Your updates will be saved to your profile and account settings.
+                        </p>
+                        <button type="submit"
+                                class="shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl transition shadow-sm hover:shadow-md">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <!-- Skills first -->
+            <div class="bg-white shadow rounded-2xl p-6 md:p-7">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Your Skills</h3>
+                    <a href="{% url 'add_skill' %}" class="text-indigo-600 font-medium hover:text-indigo-800">
+                        Add New
+                    </a>
+                </div>
+
+                {% if user_skills %}
+                    <div class="space-y-3">
+                        {% for user_skill in user_skills %}
+                            <div class="border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div>
+                                    <p class="font-semibold text-gray-800">{{ user_skill.skill.name }}</p>
+                                    <p class="text-sm text-gray-500">
+                                        {{ user_skill.skill.category }} • {{ user_skill.get_level_display }}
+                                    </p>
+                                </div>
+                                <a href="{% url 'delete_skill' user_skill.id %}"
+                                   class="text-red-600 hover:text-red-800 text-sm font-medium sm:self-auto self-start">
+                                    Remove
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-gray-500 bg-gray-50 border border-gray-200 rounded-xl p-4">
+                        You have not added any skills yet.
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Security second -->
+            <div class="bg-white shadow rounded-2xl p-6 md:p-7 mt-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-3">Security</h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    Update your password in a separate secure step.
+                </p>
+
+                <a href="{% url 'password_change' %}"
+                   class="inline-flex items-center justify-center w-full bg-gray-900 hover:bg-black text-white font-semibold px-5 py-3 rounded-xl transition shadow-sm hover:shadow-md">
+                    Change Password
+                </a>
+
+                <p class="text-xs text-gray-500 mt-3">
+                    You’ll be asked for your current password before setting a new one.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const hiddenInput = document.getElementById("id_availability_json");
+    const list = document.getElementById("availability-list");
+    const errorBox = document.getElementById("availability-errors");
+
+    const dayInput = document.getElementById("availability-day");
+    const startInput = document.getElementById("availability-start");
+    const endInput = document.getElementById("availability-end");
+    const addButton = document.getElementById("add-availability-slot");
+
+    let availability = [];
+
+    try {
+        availability = hiddenInput.value ? JSON.parse(hiddenInput.value) : [];
+    } catch (e) {
+        availability = [];
+    }
+
+    function dayLabel(day) {
+        const labels = {
+            Mon: "Monday",
+            Tue: "Tuesday",
+            Wed: "Wednesday",
+            Thu: "Thursday",
+            Fri: "Friday",
+            Sat: "Saturday",
+            Sun: "Sunday"
+        };
+        return labels[day] || day;
+    }
+
+    function syncHiddenInput() {
+        hiddenInput.value = JSON.stringify(availability);
+    }
+
+    function renderAvailability() {
+        list.innerHTML = "";
+
+        if (!availability.length) {
+            list.innerHTML = `
+                <div class="text-gray-500 bg-gray-50 border border-gray-200 rounded-xl p-4">
+                    No availability slots added yet.
+                </div>
+            `;
+            syncHiddenInput();
+            return;
+        }
+
+        availability.forEach((slot, index) => {
+            const item = document.createElement("div");
+            item.className = "flex items-center justify-between border border-gray-200 rounded-xl p-4 bg-white";
+            item.innerHTML = `
+                <div>
+                    <p class="font-medium text-gray-800">${dayLabel(slot.day)}</p>
+                    <p class="text-sm text-gray-500">${slot.start} - ${slot.end}</p>
+                </div>
+                <button type="button" class="text-red-600 hover:text-red-800 font-medium" data-index="${index}">
+                    Remove
+                </button>
+            `;
+            list.appendChild(item);
+        });
+
+        syncHiddenInput();
+
+        list.querySelectorAll("button[data-index]").forEach(button => {
+            button.addEventListener("click", function () {
+                const index = parseInt(this.dataset.index);
+                availability.splice(index, 1);
+                renderAvailability();
+            });
+        });
+    }
+
+    addButton.addEventListener("click", function () {
+        errorBox.textContent = "";
+
+        const day = dayInput.value;
+        const start = startInput.value;
+        const end = endInput.value;
+
+        if (!day || !start || !end) {
+            errorBox.textContent = "Please choose a day, start time, and end time.";
+            return;
+        }
+
+        if (start >= end) {
+            errorBox.textContent = "End time must be later than start time.";
+            return;
+        }
+
+        availability.push({
+            day: day,
+            start: start,
+            end: end
+        });
+
+        renderAvailability();
+
+        startInput.value = "";
+        endInput.value = "";
+    });
+
+    renderAvailability();
+});
+</script>
+
+{% endblock %}

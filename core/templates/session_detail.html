@@ -1,4 +1,4 @@
-{% extends 'core/base.html' %}
+{% extends 'base.html' %}
 {% block content %}
 
 <h2 class="text-3xl font-extrabold text-indigo-700 mb-6">Session Details</h2>
@@ -16,14 +16,22 @@
         </span>
     </p>
 
-    {% if session.status == 'scheduled' and session.date <= now %}
-    <div class="mt-4">
-        <a href="/complete-session/{{ session.id }}/">
-            <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
-                Mark Completed
-            </button>
-        </a>
-    </div>
+    <!-- Button only appears AFTER scheduled time -->
+    {% if session.status == 'scheduled' %}
+        {% if session.date <= now %}
+            <div class="mt-4">
+                <a href="/complete-session/{{ session.id }}/">
+                    <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+                        Mark Completed
+                    </button>
+                </a>
+            </div>
+        {% else %}
+            <p class="text-sm text-gray-500 mt-4">
+                You can mark this session as completed after 
+                <span class="font-medium text-gray-700">{{ session.date }}</span>.
+            </p>
+        {% endif %}
     {% endif %}
 </div>
 

@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 class="text-3xl font-extrabold text-indigo-700 mb-8">Sent Requests</h2>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+
+    <!-- ================= SKILL REQUESTS ================= -->
+    <section class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+        <div class="flex items-start justify-between mb-5">
+            <div>
+                <h3 class="text-2xl font-bold text-indigo-600 flex items-center gap-2">
+                    🔁 Offer Requests
+                </h3>
+                <p class="text-sm text-gray-500 mt-1">
+                    These are the skill exchange requests you sent.
+                </p>
+            </div>
+
+            <span class="text-sm font-medium px-3 py-1 rounded-full bg-indigo-50 text-indigo-700">
+                {{ skill_sent|length }} request{{ skill_sent|length|pluralize }}
+            </span>
+        </div>
+
+        {% if skill_sent %}
+        <ul class="space-y-5">
+            {% for req in skill_sent %}
+            <li class="p-5 border-l-4 border-indigo-500 rounded-xl shadow-sm hover:shadow-md bg-gray-50 transition">
+                <div class="flex flex-col gap-4">
+
+                    <div>
+                        <span class="inline-block mb-2 px-3 py-1 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded-full">
+                            Skill Exchange
+                        </span>
+
+                        <p class="text-gray-700">
+                            You sent this request to <strong>{{ req.receiver.username }}</strong>.
+                        </p>
+
+                        <p class="mt-1 text-gray-600">
+                            You offered <strong>{{ req.offer.offered_skill.name }}</strong>
+                            and requested <strong>{{ req.offer.requested_skill.name }}</strong>.
+                        </p>
+
+                        <p class="mt-2">
+                            <span class="font-semibold text-gray-700">Status:</span>
+                            <span class="px-2 py-1 rounded-full text-sm font-medium
+                                {% if req.status == 'accepted' %} bg-green-100 text-green-800
+                                {% elif req.status == 'pending' %} bg-yellow-100 text-yellow-800
+                                {% elif req.status == 'rejected' %} bg-red-100 text-red-800
+                                {% else %} bg-gray-100 text-gray-800 {% endif %}">
+                                {{ req.status|title }}
+                            </span>
+                        </p>
+                    </div>
+
+                    {% if req.status == 'accepted' %}
+                    <div class="flex gap-3">
+                        <a href="{% url 'chat_messages' req.offer.id %}"
+                           class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+                            Open Chat
+                        </a>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-gray-500 bg-gray-50 p-6 rounded-xl text-center border border-dashed">
+            You have not sent any skill exchange requests yet.
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- ================= CULTURAL REQUESTS ================= -->
+    <section class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+        <div class="flex items-start justify-between mb-5">
+            <div>
+                <h3 class="text-2xl font-bold text-purple-600 flex items-center gap-2">
+                    🌍 Cultural Requests
+                </h3>
+                <p class="text-sm text-gray-500 mt-1">
+                    These are the cultural connection requests you sent.
+                </p>
+            </div>
+
+            <span class="text-sm font-medium px-3 py-1 rounded-full bg-purple-50 text-purple-700">
+                {{ cultural_sent|length }} request{{ cultural_sent|length|pluralize }}
+            </span>
+        </div>
+
+        {% if cultural_sent %}
+        <ul class="space-y-5">
+            {% for req in cultural_sent %}
+            <li class="p-5 border-l-4 border-purple-500 rounded-xl shadow-sm hover:shadow-md bg-gray-50 transition">
+                <div class="flex flex-col gap-4">
+
+                    <div>
+                        <span class="inline-block mb-2 px-3 py-1 text-xs font-semibold bg-purple-100 text-purple-700 rounded-full">
+                            Cultural Connection
+                        </span>
+
+                        <p class="text-gray-700">
+                            You sent this request to <strong>{{ req.receiver.username }}</strong>.
+                        </p>
+
+                        {% if req.initial_message %}
+                        <p class="mt-2 text-gray-600 italic">
+                            "{{ req.initial_message }}"
+                        </p>
+                        {% endif %}
+
+                        <p class="mt-2">
+                            <span class="font-semibold text-gray-700">Status:</span>
+                            <span class="px-2 py-1 rounded-full text-sm font-medium
+                                {% if req.status == 'accepted' %} bg-green-100 text-green-800
+                                {% elif req.status == 'pending' %} bg-yellow-100 text-yellow-800
+                                {% elif req.status == 'rejected' %} bg-red-100 text-red-800
+                                {% else %} bg-gray-100 text-gray-800 {% endif %}">
+                                {{ req.status|title }}
+                            </span>
+                        </p>
+                    </div>
+
+                    {% if req.status == 'accepted' %}
+                    <div class="flex gap-3">
+                        <!-- ✅ FIXED: use request id (NOT hardcoded path) -->
+                        <a href="{% url 'chat_messages' req.id %}"
+                           class="inline-flex items-center bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">
+                            Open Chat
+                        </a>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-gray-500 bg-gray-50 p-6 rounded-xl text-center border border-dashed">
+            You have not sent any cultural connection requests yet.
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+
+{% endblock %}

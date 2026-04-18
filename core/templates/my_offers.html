@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 md:py-10 space-y-8">
+
+    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 bg-indigo-50 border border-indigo-100 rounded-2xl p-6 md:p-8 shadow-sm">
+        <div>
+            <h2 class="text-3xl font-extrabold text-indigo-700 mb-2">My Offers</h2>
+            <p class="text-gray-700 max-w-2xl">
+                Review, manage, and update the offers you have created.
+            </p>
+        </div>
+
+        <a href="{% url 'create_offer' %}"
+           class="inline-flex items-center justify-center bg-indigo-600 text-white px-5 py-3 rounded-xl hover:bg-indigo-700 transition font-semibold shadow-sm hover:shadow-md">
+            Create New Offer
+        </a>
+    </div>
+
+    <div class="bg-white shadow-lg rounded-2xl p-6 border border-gray-100">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Skill</label>
+                <input type="text"
+                       name="skill"
+                       value="{{ request.GET.skill }}"
+                       placeholder="e.g. Guitar"
+                       class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                <input type="text"
+                       name="category"
+                       value="{{ request.GET.category }}"
+                       placeholder="e.g. Music"
+                       class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Keyword</label>
+                <input type="text"
+                       name="keyword"
+                       value="{{ request.GET.keyword }}"
+                       placeholder="Search description"
+                       class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                <select name="status"
+                        class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Any</option>
+                    <option value="open" {% if request.GET.status == "open" %}selected{% endif %}>Open</option>
+                    <option value="matched" {% if request.GET.status == "matched" %}selected{% endif %}>Matched</option>
+                    <option value="closed" {% if request.GET.status == "closed" %}selected{% endif %}>Closed</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit"
+                        class="flex-1 bg-indigo-600 text-white px-4 py-3 rounded-xl hover:bg-indigo-700 transition font-semibold shadow-sm hover:shadow-md">
+                    Filter
+                </button>
+                <a href="{% url 'my_offers' %}"
+                   class="flex-1 text-center border border-gray-300 text-gray-700 px-4 py-3 rounded-xl hover:bg-gray-50 transition font-medium">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="space-y-5">
+        {% for offer in offers %}
+            <div class="bg-white shadow-lg rounded-2xl p-6 md:p-7 hover:shadow-xl transition border border-gray-100">
+                <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-3 mb-3">
+                            <h3 class="text-xl font-bold text-indigo-700">
+                                You offer {{ offer.offered_skill.name }}
+                            </h3>
+
+                            <span class="text-sm px-3 py-1 rounded-full font-medium
+                                {% if offer.status == 'open' %}bg-green-100 text-green-700
+                                {% elif offer.status == 'matched' %}bg-blue-100 text-blue-700
+                                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                {{ offer.status|title }}
+                            </span>
+                        </div>
+
+                        <p class="text-gray-700 mb-2">
+                            <span class="font-semibold">Looking for:</span> {{ offer.requested_skill.name }}
+                        </p>
+
+                        {% if offer.description %}
+                            <p class="text-gray-600 mb-4 leading-7">{{ offer.description }}</p>
+                        {% endif %}
+
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            {% if offer.prefers_online %}
+                                <span class="bg-indigo-50 text-indigo-700 text-sm px-3 py-1 rounded-full font-medium">
+                                    Online
+                                </span>
+                            {% endif %}
+
+                            {% if offer.prefers_inperson %}
+                                <span class="bg-indigo-50 text-indigo-700 text-sm px-3 py-1 rounded-full font-medium">
+                                    In-person
+                                </span>
+                            {% endif %}
+
+                            {% if offer.multiple_sessions %}
+                                <span class="bg-purple-50 text-purple-700 text-sm px-3 py-1 rounded-full font-medium">
+                                    Multiple sessions
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        {% if offer.suggested_location %}
+                            <p class="text-sm text-gray-500">
+                                <span class="font-semibold">Suggested location:</span> {{ offer.suggested_location }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 lg:justify-end">
+                        <a href="{% url 'edit_offer' offer.id %}"
+                           class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg transition font-medium">
+                            Edit
+                        </a>
+
+                        <a href="{% url 'delete_offer' offer.id %}"
+                           class="text-red-600 hover:text-red-800 px-2 py-2 font-medium">
+                            Delete
+                        </a>
+
+                        {% if offer.status == 'open' %}
+                            <a href="{% url 'review_requests' %}"
+                               class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
+                                View Requests
+                            </a>
+                        {% elif offer.status == 'matched' %}
+                            <a href="{% url 'chat_messages' offer.id %}"
+                               class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
+                                Open Chat
+                            </a>
+
+                            {% if offer.accepted_match_request %}
+                                <a href="{% url 'create_session' 'match' offer.accepted_match_request.id %}"
+                                   class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-medium">
+                                    Create Session
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        {% empty %}
+            <div class="bg-white border border-gray-200 rounded-2xl p-10 text-center shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">You have not created any offers yet</h3>
+                <p class="text-gray-500 mb-4">
+                    Start by creating an offer so others can discover what you can teach.
+                </p>
+                <a href="{% url 'create_offer' %}"
+                   class="inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl transition font-semibold">
+                    Create Your First Offer
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h2 class="text-3xl font-extrabold text-indigo-700 mb-2">My Cultural Connections</h2>
+            <p class="text-gray-600">
+                These are the people you are already connected with through cultural discovery.
+            </p>
+        </div>
+
+        <a href="{% url 'cultural_discovery' %}"
+           class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl transition font-semibold">
+            Back to Discovery
+        </a>
+    </div>
+
+    {% if connections %}
+    <ul class="space-y-6">
+        {% for req in connections %}
+        <li class="p-6 border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg bg-white transition">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-5">
+                <div>
+                    {% if req.sender == user %}
+                        <h3 class="text-xl font-bold text-gray-800">{{ req.receiver.username }}</h3>
+                        <p class="text-sm text-gray-500 mt-1">
+                            You started this connection.
+                        </p>
+                    {% else %}
+                        <h3 class="text-xl font-bold text-gray-800">{{ req.sender.username }}</h3>
+                        <p class="text-sm text-gray-500 mt-1">
+                            They reached out to you first.
+                        </p>
+                    {% endif %}
+
+                    <div class="mt-3 flex items-center gap-3 flex-wrap">
+                        <span class="text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium">
+                            Connected
+                        </span>
+                        <span class="text-sm text-gray-500">
+                            Since {{ req.created_at|date:"M j, Y" }}
+                        </span>
+                    </div>
+
+                    {% if req.initial_message %}
+                    <p class="text-gray-600 mt-3 leading-7">
+                        <span class="font-semibold">First message:</span> {{ req.initial_message }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <div class="mt-2 md:mt-0 flex flex-wrap gap-3">
+                    <a href="{% url 'cultural_chat' req.id %}"
+                       class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition font-medium">
+                        Open Chat
+                    </a>
+
+                    <a href="{% url 'create_session' 'cultural' req.id %}"
+                       class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition font-medium">
+                        Create Session
+                    </a>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="text-center py-12 text-gray-500 bg-gray-50 rounded-2xl shadow-sm border border-gray-200">
+        You do not have any accepted cultural connections yet.
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

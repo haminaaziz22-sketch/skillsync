@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="max-w-4xl mx-auto px-4 py-10">
+  <div class="bg-white shadow-2xl rounded-2xl p-8 md:p-10 border border-indigo-100">
+    <div class="mb-8">
+      <h2 class="text-3xl font-extrabold text-indigo-700">Create an Offer</h2>
+      <p class="text-gray-600 mt-2 max-w-2xl">
+        Share a skill you can offer and let others know what you would like to learn in return.
+      </p>
+    </div>
+
+    <form method="post" class="space-y-8">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Offered skill -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          {{ form.offered_skill.label }}
+        </label>
+        {{ form.offered_skill }}
+        {% if form.offered_skill.help_text %}
+          <p class="text-sm text-gray-500 mt-1">{{ form.offered_skill.help_text }}</p>
+        {% endif %}
+        {% if form.offered_skill.errors %}
+          <div class="text-red-600 text-sm mt-1">
+            {% for error in form.offered_skill.errors %}<p>{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Requested skill -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          {{ form.requested_skill_name.label }}
+        </label>
+        {{ form.requested_skill_name }}
+        {% if form.requested_skill_name.help_text %}
+          <p class="text-sm text-gray-500 mt-1">{{ form.requested_skill_name.help_text }}</p>
+        {% endif %}
+        {% if form.requested_skill_name.errors %}
+          <div class="text-red-600 text-sm mt-1">
+            {% for error in form.requested_skill_name.errors %}<p>{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          {{ form.description.label }}
+        </label>
+        {{ form.description }}
+        {% if form.description.help_text %}
+          <p class="text-sm text-gray-500 mt-1">{{ form.description.help_text }}</p>
+        {% endif %}
+        {% if form.description.errors %}
+          <div class="text-red-600 text-sm mt-1">
+            {% for error in form.description.errors %}<p>{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Meeting preferences -->
+      <div class="border-t border-gray-100 pt-8">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Session Preferences</h3>
+
+        <div class="space-y-3">
+          <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl bg-gray-50">
+            {{ form.prefers_online }}
+            <div>
+              <p class="font-medium text-gray-800">{{ form.prefers_online.label }}</p>
+            </div>
+          </label>
+
+          <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl bg-gray-50">
+            {{ form.prefers_inperson }}
+            <div>
+              <p class="font-medium text-gray-800">{{ form.prefers_inperson.label }}</p>
+            </div>
+          </label>
+
+          <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl bg-gray-50">
+            {{ form.multiple_sessions }}
+            <div>
+              <p class="font-medium text-gray-800">{{ form.multiple_sessions.label }}</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Suggested location -->
+      <div class="border-t border-gray-100 pt-8">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          {{ form.suggested_location.label }}
+        </label>
+        {{ form.suggested_location }}
+        {% if form.suggested_location.help_text %}
+          <p class="text-sm text-gray-500 mt-1">{{ form.suggested_location.help_text }}</p>
+        {% endif %}
+        {% if form.suggested_location.errors %}
+          <div class="text-red-600 text-sm mt-1">
+            {% for error in form.suggested_location.errors %}<p>{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Actions -->
+      <div class="border-t border-gray-100 pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <p class="text-sm text-gray-500">
+          Make sure the skill you are offering is something already listed in your profile.
+        </p>
+
+        <div class="flex gap-3">
+          <a href="{% url 'my_offers' %}"
+             class="inline-flex items-center justify-center px-5 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition font-medium">
+            Cancel
+          </a>
+
+          <button type="submit"
+                  class="inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-sm hover:shadow-md">
+            Create Offer
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

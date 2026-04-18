@@ -1,4 +1,4 @@
-{% extends 'core/base.html' %}
+{% extends 'base.html' %}
 {% block content %}
 
 <div class="mb-6">
@@ -12,13 +12,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 items-center">
                     <!-- Session Info -->
                     <div>
-                        <p class="text-gray-700"><span class="font-semibold">Type:</span> {{ session.type }}</p>
+                        <p class="text-gray-700"><span class="font-semibold">Type:</span> {{ session.type|title }}</p>
                         <p class="text-gray-700"><span class="font-semibold">Date:</span> {{ session.date }}</p>
                         <p class="text-gray-700"><span class="font-semibold">Status:</span> 
                             <span class="px-2 py-1 rounded-full text-sm font-medium
                                 {% if session.status == 'scheduled' %} bg-yellow-100 text-yellow-800
                                 {% elif session.status == 'completed' %} bg-green-100 text-green-800
-                                {% elif session.status == 'canceled' %} bg-red-100 text-red-800
+                                {% elif session.status == 'cancelled' %} bg-red-100 text-red-800
                                 {% else %} bg-gray-100 text-gray-800 {% endif %}">
                                 {{ session.status|title }}
                             </span>
@@ -30,18 +30,22 @@
 
                     <!-- Actions -->
                     <div class="flex flex-wrap gap-3 mt-4 md:mt-0 justify-start md:justify-end">
-                        <a href="/session/{{ session.id }}/">
+                        <a href="{% url 'session_detail' session.id %}">
                             <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">View Details</button>
                         </a>
 
                         {% if session.status == 'scheduled' %}
-                            <a href="/reschedule-session/{{ session.id }}/">
+                            <a href="{% url 'reschedule_session' session.id %}">
                                 <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition">Reschedule</button>
                             </a>
 
-                            <a href="/cancel-session/{{ session.id }}/">
-                                <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">Cancel</button>
-                            </a>
+                            <!-- Cancel must be POST -->
+                            <form action="{% url 'cancel_session' session.id %}" method="post" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">
+                                    Cancel
+                                </button>
+                            </form>
                         {% endif %}
                     </div>
                 </div>

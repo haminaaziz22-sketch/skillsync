@@ -12,12 +12,16 @@ urlpatterns = [
     path('add-skill/', views.add_skill, name='add_skill'),
     path('delete-skill/<int:skill_id>/', views.delete_skill, name='delete_skill'),
     path('cultural/', views.cultural_discovery, name='cultural_discovery'),
-    path('category-recommendations/', views.category_recommendations, name='category_recommendations'),
+    path('my-cultural-connections/', views.my_cultural_connections, name='my_cultural_connections'),
 
-
+    path('cultural-discovery/', views.cultural_discovery, name='cultural_discovery'),
+    path('cultural-interest/<int:user_id>/', views.send_cultural_interest, name='send_cultural_interest'),
+    path('handle-cultural-request/<int:request_id>/<str:action>/', views.handle_cultural_request, name='handle_cultural_request'),
+    path('cultural-chat/<int:request_id>/', views.cultural_chat, name='cultural_chat'),
 
     # Offers
     path('create-offer/', views.create_offer, name='create_offer'),
+    path('edit-offer/<int:offer_id>/', views.edit_offer, name='edit_offer'),
     path('offers/', views.browse_offers, name='browse_offers'),
     path('my-offers/', views.my_offers, name='my_offers'),
     path('delete-offer/<int:offer_id>/', views.delete_offer, name='delete_offer'),
@@ -31,12 +35,12 @@ urlpatterns = [
 
 
     # Messaging
-    path('chat_messages/<int:offer_id>/', views.chat_messages, name='chat_messages'),
-    path('fetch_messages/<int:offer_id>/', views.fetch_messages, name='fetch_messages'),
+    path('chat/<int:target_id>/', views.chat_messages, name='chat_messages'),
+    path('fetch_messages/<int:target_id>/', views.fetch_messages, name='fetch_messages'),
 
 
     # Sessions
-    path('create-session/<int:offer_id>/', views.create_session, name='create_session'),
+    path("sessions/create/<str:target_type>/<int:target_id>/", views.create_session, name="create_session"),
     path('session/<int:session_id>/', views.session_detail, name='session_detail'),
     path('my-sessions/', views.my_sessions, name='my_sessions'),
     path('cancel-session/<int:session_id>/', views.cancel_session, name='cancel_session'),

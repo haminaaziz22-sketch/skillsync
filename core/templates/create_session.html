@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="max-w-4xl mx-auto px-4 py-10">
+  <div class="bg-white shadow-2xl rounded-2xl border border-indigo-100 overflow-hidden">
+
+    <!-- Top header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-blue-600 px-8 py-8 text-white">
+      <p class="text-sm uppercase tracking-[0.18em] text-indigo-100 mb-2">
+        {% if is_cultural %}
+          Cultural Session
+        {% else %}
+          Skill Exchange Session
+        {% endif %}
+      </p>
+
+      <h2 class="text-3xl font-extrabold">
+        {% if is_reschedule %}
+          Reschedule Session
+        {% else %}
+          Create Session
+        {% endif %}
+      </h2>
+
+      <p class="mt-2 text-indigo-100 max-w-2xl">
+        {% if is_reschedule %}
+          Update the date, time, or format for this session.
+        {% elif is_cultural %}
+          Set up a cultural learning session and choose how you want to meet.
+        {% else %}
+          Schedule a session for this matched offer and choose the best way to meet.
+        {% endif %}
+      </p>
+    </div>
+
+    <div class="p-8 md:p-10">
+
+      <!-- Context summary -->
+      <div class="grid md:grid-cols-3 gap-4 mb-8">
+        <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+          <p class="text-xs uppercase tracking-wide text-gray-500 mb-1">Session with</p>
+          <p class="font-semibold text-gray-800">
+            {% if session_with %}
+              {{ session_with.username }}
+            {% else %}
+              Unknown participant
+            {% endif %}
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+          <p class="text-xs uppercase tracking-wide text-gray-500 mb-1">Session for</p>
+          <p class="font-semibold text-gray-800">
+            {% if is_cultural %}
+              Cultural connection
+            {% elif offer %}
+              {{ offer.offered_skill.name }} ↔ {{ offer.requested_skill.name }}
+            {% elif session and session.offer %}
+              {{ session.offer.offered_skill.name }} ↔ {{ session.offer.requested_skill.name }}
+            {% else %}
+              Skill exchange
+            {% endif %}
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+          <p class="text-xs uppercase tracking-wide text-gray-500 mb-1">Status</p>
+          <p class="font-semibold text-gray-800">
+            {% if is_reschedule %}
+              {{ session.status|title }}
+            {% else %}
+              {{ target.status|title }}
+            {% endif %}
+          </p>
+        </div>
+      </div>
+
+      <form method="post" class="space-y-8">
+        {% csrf_token %}
+
+        <!-- Date and time -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            {% if is_reschedule %}New Date & Time{% else %}Date & Time{% endif %}
+          </label>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <input
+              type="date"
+              name="date"
+              {% if is_reschedule and date_value %}
+                value="{{ date_value|slice:':10' }}"
+              {% endif %}
+              class="w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+
+            <input
+              type="time"
+              name="time"
+              {% if is_reschedule and date_value %}
+                value="{{ date_value|slice:'11:' }}"
+              {% endif %}
+              class="w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+          </div>
+
+          <p class="mt-2 text-sm text-gray-500">
+            {% if is_reschedule %}
+              Pick a new future date and time that works better for both of you.
+            {% else %}
+              Choose a future date and time that works for both of you.
+            {% endif %}
+          </p>
+        </div>
+
+        <!-- Session type -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Session Type
+          </label>
+
+          <select
+            name="session_type"
+            class="w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="" {% if not type_value %}selected{% endif %}>
+              Auto choose based on shared preferences
+            </option>
+            <option value="online" {% if type_value == 'online' %}selected{% endif %}>
+              Online
+            </option>
+            <option value="inperson" {% if type_value == 'inperson' %}selected{% endif %}>
+              In Person
+            </option>
+          </select>
+
+          <p class="mt-2 text-sm text-gray-500">
+            Online sessions work well for remote learning. In-person sessions are best for local meetups and hands-on activities.
+          </p>
+        </div>
+
+        <!-- Preview card -->
+        <div class="rounded-2xl border border-indigo-100 bg-indigo-50 p-5">
+          <h3 class="text-lg font-semibold text-indigo-800 mb-3">
+            {% if is_reschedule %}Updated Session Preview{% else %}Session Preview{% endif %}
+          </h3>
+
+          <div class="space-y-2 text-sm">
+            <p class="text-gray-700">
+              <span class="font-semibold">Participant:</span>
+              {% if session_with %}
+                {{ session_with.username }}
+              {% endif %}
+            </p>
+
+            <p class="text-gray-700">
+              <span class="font-semibold">Context:</span>
+              {% if is_cultural %}
+                Cultural exchange session
+              {% elif offer %}
+                Skill exchange for
+                <span class="font-medium">{{ offer.offered_skill.name }}</span>
+                and
+                <span class="font-medium">{{ offer.requested_skill.name }}</span>
+              {% elif session and session.offer %}
+                Skill exchange for
+                <span class="font-medium">{{ session.offer.offered_skill.name }}</span>
+                and
+                <span class="font-medium">{{ session.offer.requested_skill.name }}</span>
+              {% else %}
+                Skill exchange session
+              {% endif %}
+            </p>
+
+            <p class="text-gray-700">
+              <span class="font-semibold">Format:</span>
+              {% if suggested_type %}
+                Current format is {{ suggested_type }}
+              {% else %}
+                Auto-detected unless you choose one below
+              {% endif %}
+            </p>
+
+            <p class="text-gray-700">
+              <span class="font-semibold">Location / Platform:</span>
+              {{ suggested_location_preview|default:"Will be suggested based on the session setup." }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Optional context detail -->
+        {% if not is_cultural and offer and offer.description %}
+          <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Offer Notes</h3>
+            <p class="text-gray-600 leading-7">{{ offer.description }}</p>
+          </div>
+        {% elif not is_cultural and session and session.offer and session.offer.description %}
+          <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Offer Notes</h3>
+            <p class="text-gray-600 leading-7">{{ session.offer.description }}</p>
+          </div>
+        {% endif %}
+
+        {% if is_cultural and cultural_request and cultural_request.initial_message %}
+          <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Initial Message</h3>
+            <p class="text-gray-600 leading-7">{{ cultural_request.initial_message }}</p>
+          </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row sm:justify-between gap-4 pt-2">
+          <a href="{{ cancel_url }}"
+             class="inline-flex items-center justify-center rounded-xl border border-gray-300 px-5 py-3 font-medium text-gray-700 hover:bg-gray-50 transition">
+            Cancel
+          </a>
+
+          <button type="submit"
+                  class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-700 transition shadow-sm hover:shadow-md">
+            {% if is_reschedule %}
+              Save Changes
+            {% else %}
+              Create Session
+            {% endif %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
